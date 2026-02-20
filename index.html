@@ -79,6 +79,14 @@
   .format-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; font-family: inherit; color: #64748b; }
   .format-tab.active { background: #2563EB; color: #fff; border-color: #2563EB; }
 
+  .linear-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; width: 100%; padding: 10px; background: #5e6ad2; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; }
+  .linear-btn:hover { background: #4e5bc2; }
+  .linear-btn svg { width: 16px; height: 16px; }
+  .linear-note { font-size: 12px; color: #64748b; margin-top: 6px; line-height: 1.4; }
+
+  .action-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+  .action-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
   @media (max-width: 500px) {
     #root { padding: 14px; }
     .bubble { font-size: 13px; }
@@ -265,6 +273,42 @@ function formatPlain(answers) {
 
   return `VMC Video Request: ${answers.projectName || "Untitled"}\n${"=".repeat(40)}\n\n` +
     fields.map(([k, v]) => `${k}: ${v}`).join("\n");
+}
+
+// Video type to Linear template mapping
+// Hybrid doesn't have a template -- handled case by case
+const TEMPLATE_LABELS = {
+  "Live-action": "Live Action",
+  "Animation": "Animation",
+  "Webinar / Podcast": "Webinar-Podcast",
+  "IRL Event": "IRL Event",
+};
+
+function buildLinearURL(answers) {
+  const title = "VMC: " + (answers.projectName || "Untitled");
+  const fields = [
+    ["Overview", answers.whatAndWhy],
+    ["Audience", answers.audience],
+    ["Video type", answers.videoType],
+    ["Campaign status", answers.campaignApproved],
+    ["Copy owner", answers.copyOwner],
+    ["Distribution", answers.distribution],
+    ["Paid media", answers.paid],
+    ["Brand assets", answers.brandAssets],
+    ["Approver", answers.approver],
+    ["Target delivery", answers.timeline],
+    ["Timeline", answers.timelineReality],
+    ["Notes", answers.notes],
+  ].filter(([k, v]) => v);
+  const desc = fields.map(([k, v]) => `**${k}:** ${v}`).join("\n");
+  const url = new URL("https://linear.app/a8c/team/VID2/new");
+  url.searchParams.set("title", title);
+  url.searchParams.set("description", desc);
+  return url.toString();
+}
+
+function getTemplateLabel(videoType) {
+  return TEMPLATE_LABELS[videoType] || null;
 }
 
 function App() {
@@ -466,8 +510,20 @@ function App() {
                 </div>
               ))}
 
-              <div style={{marginTop: 16}}>
-                <div className="summary-title">Copy for</div>
+              <div className="action-section">
+                <div className="action-title">1. Create Linear project</div>
+                <a className="linear-btn" href={buildLinearURL(answers)} target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 100 100" fill="currentColor"><path d="M1.22 61.5a48.95 48.95 0 0 1-1.2-8.25L34.79 88a48.94 48.94 0 0 1-8.25-1.2L1.22 61.5Zm-1-13.21a49.65 49.65 0 0 1 .37-4.04L43.75 87.4c-1.35-.09-2.7-.22-4.04-.37L.23 48.29ZM2.8 39.5a49.52 49.52 0 0 1 1.33-4.2L52.7 93.87a49.7 49.7 0 0 1-4.2 1.33L2.8 39.5Zm4.28-8.83a49.13 49.13 0 0 1 2.17-3.87l61.75 61.75a49.02 49.02 0 0 1-3.87 2.17L7.08 30.67Zm6.34-8.27A49.14 49.14 0 0 1 16.5 19l62.5 62.5a49.06 49.06 0 0 1-3.4 3.08L13.42 22.4ZM22 13.73a49.48 49.48 0 0 1 28.1-12.6 49.65 49.65 0 0 1 48.77 48.77A49.48 49.48 0 0 1 86.27 78L22 13.73Z"/></svg>
+                  Open in Linear (VID2)
+                </a>
+                {getTemplateLabel(answers.videoType)
+                  ? <div className="linear-note">This opens a new issue with your intake data pre-filled. After creating it, apply the <strong>{getTemplateLabel(answers.videoType)}</strong> project template.</div>
+                  : <div className="linear-note">This opens a new issue with your intake data pre-filled. Since this is a hybrid project, VMC will set up the project structure at kickoff.</div>
+                }
+              </div>
+
+              <div className="action-section">
+                <div className="action-title">2. Post to P2 or Slack</div>
                 <div className="format-tabs">
                   {[["slack", "Slack"], ["p2", "P2 Post"], ["plain", "Plain text"]].map(([k, l]) => (
                     <button key={k} className={"format-tab" + (copyFormat === k ? " active" : "")} onClick={() => { setCopyFormat(k); setCopied(false); }}>{l}</button>
