@@ -59,7 +59,7 @@
   .summary-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
   .summary-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
   .summary-row { display: flex; gap: 8px; padding: 4px 0; font-size: 13px; }
-  .summary-label { width: 90px; color: #64748b; font-weight: 600; flex-shrink: 0; }
+  .summary-label { width: 110px; color: #64748b; font-weight: 600; flex-shrink: 0; }
   .summary-val { line-height: 1.4; }
 
   .copy-btn { margin-top: 12px; width: 100%; padding: 10px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
@@ -78,6 +78,10 @@
   .format-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
   .format-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; font-family: inherit; color: #64748b; }
   .format-tab.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+
+  .back-btn { padding: 6px 12px; background: none; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; color: #64748b; margin-right: 8px; }
+  .back-btn:hover { border-color: #2563EB; color: #2563EB; }
+  .input-controls { display: flex; align-items: center; margin-left: 32px; margin-bottom: 8px; }
 
   .linear-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; width: 100%; padding: 10px; background: #5e6ad2; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; }
   .linear-btn:hover { background: #4e5bc2; }
@@ -113,7 +117,7 @@ const FIELD_LABELS = {
 };
 
 const questions = [
-  { id: 0, msg: "Hey! I'm the VMC intake assistant. I'll walk you through a few questions to check if your project is ready for kickoff. Takes less than 5 minutes.\n\nWhat's the working name for this project?", type: "text", placeholder: "e.g., WooPayments Q2 Launch Video", field: "projectName" },
+  { id: 0, msg: "Hey! I'm the VMC intake assistant. I'll walk you through a few questions to check if your project is ready for kickoff. Takes about 5 minutes.\n\nWhat's the working name for this project?", type: "text", placeholder: "e.g., WooPayments Q2 Launch Video", field: "projectName" },
   { id: 1, msg: "In 2-3 sentences, what is this project and why does it matter right now? Not what the video should look like -- what business problem it solves.", type: "text", placeholder: "e.g., We're launching WooCommerce Payments in three new markets and need a product demo to drive trial signups.", field: "whatAndWhy",
     check: v => v.split(/\s+/).length < 8 ? "That's pretty short. Can you add more about why this matters and what it supports? More context helps VMC nail the creative direction." : null },
   { id: 2, msg: "Who is going to watch this? Be specific: roles, industries, where they are in the buying journey.", type: "text", placeholder: "e.g., Mid-market ecommerce managers evaluating payment solutions. Awareness to consideration stage.", field: "audience",
@@ -205,9 +209,9 @@ function getScore(a) {
   return { st, gaps, warns };
 }
 
-function formatP2(answers) {
-  const fields = [
-    ["Project", answers.projectName],
+function getFields(answers) {
+  return [
+    ["Project Name", answers.projectName],
     ["Overview", answers.whatAndWhy],
     ["Audience", answers.audience],
     ["Video type", answers.videoType],
@@ -221,58 +225,21 @@ function formatP2(answers) {
     ["Timeline", answers.timelineReality],
     ["Notes", answers.notes],
   ].filter(([k, v]) => v);
+}
 
-  return `<!-- wp:heading -->
-<h2>VMC Video Request: ${answers.projectName || "Untitled"}</h2>
-<!-- /wp:heading -->
-
-<!-- wp:table -->
-<figure class="wp-block-table"><table><tbody>
-${fields.map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).join("\n")}
-</tbody></table></figure>
-<!-- /wp:table -->`;
+function formatP2(answers) {
+  const fields = getFields(answers);
+  return fields.map(([k, v]) => `${k}: ${v}`).join("\n");
 }
 
 function formatSlack(answers) {
-  const fields = [
-    ["Project", answers.projectName],
-    ["Overview", answers.whatAndWhy],
-    ["Audience", answers.audience],
-    ["Video type", answers.videoType],
-    ["Campaign status", answers.campaignApproved],
-    ["Copy owner", answers.copyOwner],
-    ["Distribution", answers.distribution],
-    ["Paid media", answers.paid],
-    ["Brand assets", answers.brandAssets],
-    ["Approver", answers.approver],
-    ["Target delivery", answers.timeline],
-    ["Timeline", answers.timelineReality],
-    ["Notes", answers.notes],
-  ].filter(([k, v]) => v);
-
-  return `:movie_camera: *VMC Video Request: ${answers.projectName || "Untitled"}*\n\n` +
-    fields.map(([k, v]) => `*${k}:* ${v}`).join("\n");
+  const fields = getFields(answers);
+  return fields.map(([k, v]) => `${k}: ${v}`).join("\n");
 }
 
 function formatPlain(answers) {
-  const fields = [
-    ["Project", answers.projectName],
-    ["Overview", answers.whatAndWhy],
-    ["Audience", answers.audience],
-    ["Video type", answers.videoType],
-    ["Campaign status", answers.campaignApproved],
-    ["Copy owner", answers.copyOwner],
-    ["Distribution", answers.distribution],
-    ["Paid media", answers.paid],
-    ["Brand assets", answers.brandAssets],
-    ["Approver", answers.approver],
-    ["Target delivery", answers.timeline],
-    ["Timeline", answers.timelineReality],
-    ["Notes", answers.notes],
-  ].filter(([k, v]) => v);
-
-  return `VMC Video Request: ${answers.projectName || "Untitled"}\n${"=".repeat(40)}\n\n` +
-    fields.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const fields = getFields(answers);
+  return fields.map(([k, v]) => `${k}: ${v}`).join("\n");
 }
 
 // Video type to Linear template mapping
@@ -285,22 +252,9 @@ const TEMPLATE_LABELS = {
 };
 
 function buildLinearURL(answers) {
-  const title = "VMC: " + (answers.projectName || "Untitled");
-  const fields = [
-    ["Overview", answers.whatAndWhy],
-    ["Audience", answers.audience],
-    ["Video type", answers.videoType],
-    ["Campaign status", answers.campaignApproved],
-    ["Copy owner", answers.copyOwner],
-    ["Distribution", answers.distribution],
-    ["Paid media", answers.paid],
-    ["Brand assets", answers.brandAssets],
-    ["Approver", answers.approver],
-    ["Target delivery", answers.timeline],
-    ["Timeline", answers.timelineReality],
-    ["Notes", answers.notes],
-  ].filter(([k, v]) => v);
-  const desc = fields.map(([k, v]) => `**${k}:** ${v}`).join("\n");
+  const title = answers.projectName || "Untitled";
+  const fields = getFields(answers);
+  const desc = fields.map(([k, v]) => `${k}: ${v}`).join("\n");
   const url = new URL("https://linear.app/a8c/team/VID2/new");
   url.searchParams.set("title", title);
   url.searchParams.set("description", desc);
@@ -320,8 +274,27 @@ function App() {
   const [done, setDone] = useState(false);
   const [copyFormat, setCopyFormat] = useState("slack");
   const [copied, setCopied] = useState(false);
+  // snapshots stores state before each answer so we can undo
+  const [snapshots, setSnapshots] = useState([]);
 
   const current = questions[step];
+
+  const saveSnapshot = () => {
+    setSnapshots(prev => [...prev, { step, answers: {...answers}, history: [...history], blocked, done }]);
+  };
+
+  const undo = () => {
+    if (snapshots.length === 0) return;
+    const prev = snapshots[snapshots.length - 1];
+    setStep(prev.step);
+    setAnswers(prev.answers);
+    setHistory(prev.history);
+    setBlocked(prev.blocked);
+    setDone(prev.done);
+    setInputVal("");
+    setCopied(false);
+    setSnapshots(s => s.slice(0, -1));
+  };
 
   const submit = (value) => {
     const q = questions[step];
@@ -335,6 +308,10 @@ function App() {
         return;
       }
     }
+
+    // Save state before making changes
+    saveSnapshot();
+
     const newAnswers = { ...answers, [q.field]: value };
     const entry = { q: q.msg, a: value, warn: null };
 
@@ -371,7 +348,7 @@ function App() {
   };
 
   const restart = () => {
-    setStep(0); setAnswers({}); setHistory([]); setInputVal(""); setBlocked(null); setDone(false); setCopied(false);
+    setStep(0); setAnswers({}); setHistory([]); setInputVal(""); setBlocked(null); setDone(false); setCopied(false); setSnapshots([]);
   };
 
   const doCopy = () => {
@@ -386,15 +363,7 @@ function App() {
   };
 
   const result = done ? getScore(answers) : null;
-  const summaryFields = [
-    ["Project", answers.projectName],
-    ["Overview", answers.whatAndWhy],
-    ["Audience", answers.audience],
-    ["Type", answers.videoType],
-    ["Delivery", answers.timeline],
-    ["Approver", answers.approver],
-    ["Notes", answers.notes],
-  ].filter(([k, v]) => v);
+  const summaryFields = getFields(answers);
 
   return (
     <div>
@@ -439,6 +408,7 @@ function App() {
             </a>
           </div>
           <button className="restart-btn" onClick={restart}>Start over</button>
+          {snapshots.length > 0 && <button className="back-btn" onClick={undo} style={{marginLeft: 8}}>&#8592; Go back and change answer</button>}
         </div>
       )}
 
@@ -448,6 +418,11 @@ function App() {
             <div className="avatar bot">V</div>
             <div className="bubble bot" style={{whiteSpace: "pre-line"}}>{current.msg}</div>
           </div>
+          {snapshots.length > 0 && (
+            <div className="input-controls">
+              <button className="back-btn" onClick={undo}>&#8592; Back</button>
+            </div>
+          )}
           <div className="input-area">
             {current.type === "text" && (
               <div className="text-row">
