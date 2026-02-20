@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VMC Intake | Video and Motion Creative</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #0f172a; }
+  #root { max-width: 640px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+
+  .header { display: flex; align-items: center; gap: 10px; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+  .header-icon { width: 36px; height: 36px; border-radius: 8px; background: #2563EB; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 15px; }
+  .header-title { font-weight: 700; font-size: 16px; }
+  .header-sub { font-size: 13px; color: #64748b; }
+
+  .bubble-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .bubble-row.user { justify-content: flex-end; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .avatar.bot { background: #2563EB; }
+  .avatar.warn { background: #d97706; }
+  .avatar.error { background: #dc2626; }
+
+  .bubble { border-radius: 2px 10px 10px 10px; padding: 8px 12px; font-size: 14px; line-height: 1.55; max-width: 480px; }
+  .bubble.bot { background: #fff; border: 1px solid #e2e8f0; }
+  .bubble.warn { background: #fffbeb; border: 1px solid #fcd34d; }
+  .bubble.error { background: #fef2f2; border: 1px solid #fecaca; }
+  .bubble.user { background: #2563EB; color: #fff; border-radius: 10px 2px 10px 10px; }
+
+  .qa-block { margin-bottom: 16px; }
+
+  .input-area { margin-left: 32px; margin-top: 8px; }
+  .text-row { display: flex; gap: 6px; }
+  .text-input { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
+  .text-input:focus { border-color: #2563EB; }
+  .send-btn { padding: 8px 14px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .send-btn:hover { background: #1d4ed8; }
+  .send-btn:disabled { background: #e2e8f0; cursor: default; }
+
+  .choice-list { display: flex; flex-direction: column; gap: 6px; max-width: 420px; }
+  .choice-btn { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 9px 14px; text-align: left; cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: all 0.12s; }
+  .choice-btn:hover { border-color: #2563EB; background: #f0f7ff; }
+  .choice-desc { font-size: 12px; color: #64748b; margin-top: 1px; font-weight: 400; }
+
+  .result-card { border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .result-card.ready { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .result-card.almost { background: #fffbeb; border: 1px solid #fde68a; }
+  .result-card.not_ready { background: #fef2f2; border: 1px solid #fecaca; }
+  .result-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .result-title.ready { color: #16a34a; }
+  .result-title.almost { color: #d97706; }
+  .result-title.not_ready { color: #dc2626; }
+  .result-desc { font-size: 14px; line-height: 1.5; }
+  .result-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 4px; }
+  .result-section-label.gaps { color: #dc2626; }
+  .result-section-label.warns { color: #d97706; }
+  .result-item { font-size: 13px; padding: 2px 0; }
+
+  .summary-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .summary-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .summary-row { display: flex; gap: 8px; padding: 4px 0; font-size: 13px; }
+  .summary-label { width: 90px; color: #64748b; font-weight: 600; flex-shrink: 0; }
+  .summary-val { line-height: 1.4; }
+
+  .copy-btn { margin-top: 12px; width: 100%; padding: 10px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .copy-btn:hover { background: #1d4ed8; }
+  .copy-btn.copied { background: #16a34a; }
+
+  .restart-btn { padding: 8px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; color: #64748b; }
+  .restart-btn:hover { border-color: #2563EB; color: #2563EB; }
+
+  .resource-list { display: flex; flex-direction: column; gap: 6px; margin-left: 32px; max-width: 340px; margin-bottom: 12px; }
+  .resource-link { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 9px 12px; cursor: pointer; text-decoration: none; display: block; }
+  .resource-link:hover { border-color: #2563EB; }
+  .resource-label { font-size: 13px; font-weight: 600; color: #2563EB; }
+  .resource-desc { font-size: 12px; color: #64748b; margin-top: 1px; }
+
+  .format-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .format-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; font-family: inherit; color: #64748b; }
+  .format-tab.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+
+  @media (max-width: 500px) {
+    #root { padding: 14px; }
+    .bubble { font-size: 13px; }
+    .summary-label { width: 70px; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+
+const FIELD_LABELS = {
+  projectName: "Project",
+  whatAndWhy: "Overview",
+  audience: "Audience",
+  videoType: "Type",
+  timeline: "Delivery",
+  approver: "Approver",
+  notes: "Notes",
+};
+
+const questions = [
+  { id: 0, msg: "Hey! I'm the VMC intake assistant. I'll walk you through a few questions to check if your project is ready for kickoff. Takes about 5 minutes.\n\nWhat's the working name for this project?", type: "text", placeholder: "e.g., WooPayments Q2 Launch Video", field: "projectName" },
+  { id: 1, msg: "In 2-3 sentences, what is this project and why does it matter right now? Not what the video should look like -- what business problem it solves.", type: "text", placeholder: "e.g., We're launching WooCommerce Payments in three new markets and need a product demo to drive trial signups.", field: "whatAndWhy",
+    check: v => v.split(/\s+/).length < 8 ? "That's pretty short. Can you add more about why this matters and what it supports? More context helps VMC nail the creative direction." : null },
+  { id: 2, msg: "Who is going to watch this? Be specific: roles, industries, where they are in the buying journey.", type: "text", placeholder: "e.g., Mid-market ecommerce managers evaluating payment solutions. Awareness to consideration stage.", field: "audience",
+    check: v => ["everyone","our customers","all users","general audience","broad audience"].some(x => v.toLowerCase().includes(x)) ? "\"" + v.trim() + "\" is too broad for VMC to target effectively. Think job titles, company size, industry, or what problem they're solving." : null },
+  { id: 3, msg: "What type of video are you thinking?", type: "choice", field: "videoType", options: [
+    { v: "Live-action", d: "Product demos, customer stories, brand films" },
+    { v: "Animation", d: "Explainers, product features, motion graphics" },
+    { v: "Webinar / Podcast", d: "Remote recordings, panels, thought leadership" },
+    { v: "IRL Event", d: "Conference coverage, on-site interviews" },
+    { v: "Hybrid", d: "Mix of formats" },
+    { v: "Not sure yet", d: "You know the goal, not the format" },
+  ]},
+  { id: 4, msg: "Now the important stuff. Has this campaign or initiative been approved by your team's leadership?", type: "choice", field: "campaignApproved", options: [
+    { v: "Yes, approved and resourced" },
+    { v: "Approved, not fully resourced" },
+    { v: "Still in discussion" },
+    { v: "Not yet" },
+  ], gate: v => {
+    if (v === "Not yet") return { stop: true, text: "VMC can't start production on a campaign that hasn't been approved yet. Once your team has alignment and approval, come back and we'll get things moving." };
+    if (v === "Still in discussion") return { warn: "Heads up: VMC won't schedule a kickoff until the campaign is approved. But let's keep going so you're ready when it is." };
+    return null;
+  }},
+  { id: 5, msg: "Who is writing the script or copy for this video?", type: "choice", field: "copyOwner", options: [
+    { v: "Assigned to someone with a deadline" },
+    { v: "Our team will handle it, no one assigned yet" },
+    { v: "We were hoping VMC would write it" },
+    { v: "Haven't thought about it yet" },
+  ], gate: v => {
+    if (v === "We were hoping VMC would write it") return { warn: "VMC can develop scripts collaboratively, but we need core messaging and talking points from your team first. We shape the story; you own the message." };
+    if (v === "Haven't thought about it yet") return { warn: "Copy is the single biggest bottleneck in video production. Before kickoff, you'll need to identify who owns this and when it'll be ready." };
+    return null;
+  }},
+  { id: 6, msg: "How will this video reach the audience after VMC delivers? Who owns distribution?", type: "choice", field: "distribution", options: [
+    { v: "Plan exists with channels, owners, and timing" },
+    { v: "We know the channels but details aren't set" },
+    { v: "We'll figure it out after the video is done" },
+    { v: "No plan yet" },
+  ], gate: v => {
+    if (v === "We'll figure it out after the video is done" || v === "No plan yet") return { warn: "A video without a distribution plan is a video nobody sees. VMC builds format, length, and pacing around where the video will live. We need at least a rough plan before kickoff." };
+    return null;
+  }},
+  { id: 7, msg: "Is there paid media budget allocated for promoting this video?", type: "choice", field: "paid", options: [
+    { v: "Yes, budget approved" },
+    { v: "Requested, not approved yet" },
+    { v: "Organic only" },
+    { v: "Not sure" },
+  ]},
+  { id: 8, msg: "Are brand assets available? Logos, color palettes, fonts, design files, templates.", type: "choice", field: "brandAssets", options: [
+    { v: "All ready and accessible" },
+    { v: "Some exist, some need creating" },
+    { v: "Brand/design team will provide" },
+    { v: "Nothing exists yet" },
+  ]},
+  { id: 9, msg: "Who is the single person who will approve final delivery? One name -- not a team or committee.", type: "text", placeholder: "e.g., Sarah Chen, Sr. Marketing Manager", field: "approver",
+    check: v => ["team","committee","group","tbd","not sure","we'll decide","leadership","unsure"].some(x => v.toLowerCase().includes(x)) ? "VMC needs one named approver. When feedback comes from multiple people with competing opinions, projects stall. Who is the single person whose sign-off means 'ship it'?" : null },
+  { id: 10, msg: "When do you need final delivery? And is that date tied to a specific event or launch?", type: "text", placeholder: "e.g., March 15 for WooSesh keynote", field: "timeline" },
+  { id: 11, msg: "Most VMC projects take 4-8 weeks from kickoff to delivery. How does your target date land?", type: "choice", field: "timelineReality", options: [
+    { v: "4+ weeks, comfortable" },
+    { v: "3-4 weeks, tight but doable" },
+    { v: "Less than 3 weeks" },
+  ], gate: v => {
+    if (v === "Less than 3 weeks") return { warn: "That's very tight. Rush projects require everything else locked: copy, assets, approvals, distribution. No iteration room. VMC will evaluate feasibility if the request qualifies." };
+    return null;
+  }},
+  { id: 12, msg: "Last one. Anything else VMC should know? References, constraints, related projects, context that didn't fit above?", type: "text", placeholder: "Optional -- leave blank and hit Send if nothing comes to mind.", field: "notes", optional: true },
+];
+
+function getScore(a) {
+  let gaps = [], warns = [];
+  if (a.campaignApproved === "Not yet" || a.campaignApproved === "Still in discussion") gaps.push("Campaign not yet approved");
+  else if (a.campaignApproved === "Approved, not fully resourced") warns.push("Campaign approved but not fully resourced");
+
+  if (a.copyOwner === "Haven't thought about it yet") gaps.push("No plan for who writes copy");
+  else if (a.copyOwner === "We were hoping VMC would write it") warns.push("Copy ownership needs clarification");
+  else if (a.copyOwner === "Our team will handle it, no one assigned yet") warns.push("Copy ownership needs assignment");
+
+  if (a.distribution === "No plan yet" || a.distribution === "We'll figure it out after the video is done") gaps.push("No distribution plan");
+  else if (a.distribution === "We know the channels but details aren't set") warns.push("Distribution plan needs detail");
+
+  if (a.brandAssets === "Nothing exists yet") gaps.push("No brand assets available");
+  else if (a.brandAssets !== "All ready and accessible") warns.push("Brand assets incomplete");
+
+  if (a.timelineReality === "Less than 3 weeks") gaps.push("Timeline too tight for standard production");
+  else if (a.timelineReality === "3-4 weeks, tight but doable") warns.push("Timeline is tight");
+
+  let st = "ready";
+  if (gaps.length >= 2) st = "not_ready";
+  else if (gaps.length > 0) st = "almost";
+  return { st, gaps, warns };
+}
+
+function formatP2(answers) {
+  const fields = [
+    ["Project", answers.projectName],
+    ["Overview", answers.whatAndWhy],
+    ["Audience", answers.audience],
+    ["Video type", answers.videoType],
+    ["Campaign status", answers.campaignApproved],
+    ["Copy owner", answers.copyOwner],
+    ["Distribution", answers.distribution],
+    ["Paid media", answers.paid],
+    ["Brand assets", answers.brandAssets],
+    ["Approver", answers.approver],
+    ["Target delivery", answers.timeline],
+    ["Timeline", answers.timelineReality],
+    ["Notes", answers.notes],
+  ].filter(([k, v]) => v);
+
+  return `<!-- wp:heading -->
+<h2>VMC Video Request: ${answers.projectName || "Untitled"}</h2>
+<!-- /wp:heading -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table><tbody>
+${fields.map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).join("\n")}
+</tbody></table></figure>
+<!-- /wp:table -->`;
+}
+
+function formatSlack(answers) {
+  const fields = [
+    ["Project", answers.projectName],
+    ["Overview", answers.whatAndWhy],
+    ["Audience", answers.audience],
+    ["Video type", answers.videoType],
+    ["Campaign status", answers.campaignApproved],
+    ["Copy owner", answers.copyOwner],
+    ["Distribution", answers.distribution],
+    ["Paid media", answers.paid],
+    ["Brand assets", answers.brandAssets],
+    ["Approver", answers.approver],
+    ["Target delivery", answers.timeline],
+    ["Timeline", answers.timelineReality],
+    ["Notes", answers.notes],
+  ].filter(([k, v]) => v);
+
+  return `:movie_camera: *VMC Video Request: ${answers.projectName || "Untitled"}*\n\n` +
+    fields.map(([k, v]) => `*${k}:* ${v}`).join("\n");
+}
+
+function formatPlain(answers) {
+  const fields = [
+    ["Project", answers.projectName],
+    ["Overview", answers.whatAndWhy],
+    ["Audience", answers.audience],
+    ["Video type", answers.videoType],
+    ["Campaign status", answers.campaignApproved],
+    ["Copy owner", answers.copyOwner],
+    ["Distribution", answers.distribution],
+    ["Paid media", answers.paid],
+    ["Brand assets", answers.brandAssets],
+    ["Approver", answers.approver],
+    ["Target delivery", answers.timeline],
+    ["Timeline", answers.timelineReality],
+    ["Notes", answers.notes],
+  ].filter(([k, v]) => v);
+
+  return `VMC Video Request: ${answers.projectName || "Untitled"}\n${"=".repeat(40)}\n\n` +
+    fields.map(([k, v]) => `${k}: ${v}`).join("\n");
+}
+
+function App() {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [history, setHistory] = useState([]);
+  const [inputVal, setInputVal] = useState("");
+  const [blocked, setBlocked] = useState(null);
+  const [done, setDone] = useState(false);
+  const [copyFormat, setCopyFormat] = useState("slack");
+  const [copied, setCopied] = useState(false);
+
+  const current = questions[step];
+
+  const submit = (value) => {
+    const q = questions[step];
+    if (q.check) {
+      const err = q.check(value);
+      if (err) {
+        setHistory(prev => [...prev,
+          { q: null, a: value },
+          { q: err, a: null, warn: true }
+        ]);
+        return;
+      }
+    }
+    const newAnswers = { ...answers, [q.field]: value };
+    const entry = { q: q.msg, a: value, warn: null };
+
+    if (q.gate) {
+      const g = q.gate(value);
+      if (g && g.stop) {
+        setHistory(prev => [...prev, entry]);
+        setAnswers(newAnswers);
+        setBlocked(g.text);
+        return;
+      }
+      if (g && g.warn) {
+        setHistory(prev => [...prev, entry, { q: g.warn, a: null, warn: true }]);
+        setAnswers(newAnswers);
+        setInputVal("");
+        if (step + 1 >= questions.length) {
+          setDone(true);
+        } else {
+          setStep(step + 1);
+        }
+        return;
+      }
+    }
+
+    setAnswers(newAnswers);
+    setInputVal("");
+    if (step + 1 >= questions.length) {
+      setHistory(prev => [...prev, entry]);
+      setDone(true);
+    } else {
+      setHistory(prev => [...prev, entry]);
+      setStep(step + 1);
+    }
+  };
+
+  const restart = () => {
+    setStep(0); setAnswers({}); setHistory([]); setInputVal(""); setBlocked(null); setDone(false); setCopied(false);
+  };
+
+  const doCopy = () => {
+    const fns = { slack: formatSlack, p2: formatP2, plain: formatPlain };
+    const text = fns[copyFormat](answers);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+
+  const result = done ? getScore(answers) : null;
+  const summaryFields = [
+    ["Project", answers.projectName],
+    ["Overview", answers.whatAndWhy],
+    ["Audience", answers.audience],
+    ["Type", answers.videoType],
+    ["Delivery", answers.timeline],
+    ["Approver", answers.approver],
+    ["Notes", answers.notes],
+  ].filter(([k, v]) => v);
+
+  return (
+    <div>
+      <div className="header">
+        <div className="header-icon">V</div>
+        <div>
+          <div className="header-title">VMC Intake</div>
+          <div className="header-sub">Video and Motion Creative</div>
+        </div>
+      </div>
+
+      {history.map((h, i) => (
+        <div key={i} className="qa-block">
+          {h.q && (
+            <div className="bubble-row">
+              <div className={"avatar " + (h.warn ? "warn" : "bot")}>{h.warn ? "!" : "V"}</div>
+              <div className={"bubble " + (h.warn ? "warn" : "bot")} style={{whiteSpace: "pre-line"}}>{h.q}</div>
+            </div>
+          )}
+          {h.a && (
+            <div className="bubble-row user">
+              <div className="bubble user">{h.a}</div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {blocked && (
+        <div>
+          <div className="bubble-row" style={{marginBottom: 12}}>
+            <div className="avatar error">&#10007;</div>
+            <div className="bubble error">{blocked}</div>
+          </div>
+          <div className="resource-list">
+            <a className="resource-link" href="#" onClick={e => e.preventDefault()}>
+              <div className="resource-label">VMC Process Page &#8599;</div>
+              <div className="resource-desc">How we work, timelines, and what to expect</div>
+            </a>
+            <a className="resource-link" href="#" onClick={e => e.preventDefault()}>
+              <div className="resource-label">Campaign Planning Guide &#8599;</div>
+              <div className="resource-desc">Framework for building a video-ready campaign</div>
+            </a>
+          </div>
+          <button className="restart-btn" onClick={restart}>Start over</button>
+        </div>
+      )}
+
+      {!blocked && !done && current && (
+        <div>
+          <div className="bubble-row">
+            <div className="avatar bot">V</div>
+            <div className="bubble bot" style={{whiteSpace: "pre-line"}}>{current.msg}</div>
+          </div>
+          <div className="input-area">
+            {current.type === "text" && (
+              <div className="text-row">
+                <input className="text-input" value={inputVal} onChange={e => setInputVal(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && (current.optional || inputVal.trim())) submit(inputVal.trim()); }}
+                  placeholder={current.placeholder} autoFocus />
+                <button className="send-btn" disabled={!current.optional && !inputVal.trim()}
+                  onClick={() => { if (current.optional || inputVal.trim()) submit(inputVal.trim()); }}>Send</button>
+              </div>
+            )}
+            {current.type === "choice" && (
+              <div className="choice-list">
+                {current.options.map(opt => (
+                  <button key={typeof opt === "string" ? opt : opt.v} className="choice-btn"
+                    onClick={() => submit(typeof opt === "string" ? opt : opt.v)}>
+                    {typeof opt === "string" ? opt : opt.v}
+                    {opt.d && <div className="choice-desc">{opt.d}</div>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {done && result && (
+        <div>
+          <div className={"result-card " + result.st}>
+            <div className={"result-title " + result.st}>
+              {result.st === "ready" && "\u2713 Ready for Kickoff"}
+              {result.st === "almost" && "! Almost Ready"}
+              {result.st === "not_ready" && "\u2717 Not Ready Yet"}
+            </div>
+            <div className="result-desc">
+              {result.st === "ready" && "This project meets VMC's readiness criteria. We'll review and schedule a kickoff call within 48 hours."}
+              {result.st === "almost" && "Close, but a few gaps to address first. VMC will follow up with specific next steps."}
+              {result.st === "not_ready" && "This project needs more groundwork before VMC can start. Here's what to work on:"}
+            </div>
+            {result.gaps.length > 0 && (
+              <div>
+                <div className="result-section-label gaps">Gaps to resolve</div>
+                {result.gaps.map((g, i) => <div key={i} className="result-item">&#x2022; {g}</div>)}
+              </div>
+            )}
+            {result.warns.length > 0 && (
+              <div>
+                <div className="result-section-label warns">Heads up</div>
+                {result.warns.map((w, i) => <div key={i} className="result-item">&#x2022; {w}</div>)}
+              </div>
+            )}
+          </div>
+
+          {result.st !== "not_ready" && (
+            <div className="summary-card">
+              <div className="summary-title">Request Summary</div>
+              {summaryFields.map(([k, v], i) => (
+                <div key={i} className="summary-row">
+                  <div className="summary-label">{k}</div>
+                  <div className="summary-val">{v}</div>
+                </div>
+              ))}
+
+              <div style={{marginTop: 16}}>
+                <div className="summary-title">Copy for</div>
+                <div className="format-tabs">
+                  {[["slack", "Slack"], ["p2", "P2 Post"], ["plain", "Plain text"]].map(([k, l]) => (
+                    <button key={k} className={"format-tab" + (copyFormat === k ? " active" : "")} onClick={() => { setCopyFormat(k); setCopied(false); }}>{l}</button>
+                  ))}
+                </div>
+                <button className={"copy-btn" + (copied ? " copied" : "")} onClick={doCopy}>
+                  {copied ? "Copied!" : "Copy to clipboard"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button className="restart-btn" onClick={restart}>Start over</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
