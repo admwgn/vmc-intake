@@ -117,7 +117,7 @@ const FIELD_LABELS = {
 };
 
 const questions = [
-  { id: 0, msg: "Hey! I'm the VMC intake assistant. I'll walk you through a few questions to check if your project is ready for kickoff. Takes about 5 minutes.\n\nWhat's the working name for this project?", type: "text", placeholder: "e.g., WooPayments Q2 Launch Video", field: "projectName" },
+  { id: 0, msg: "Hey! I'm the VMC intake assistant. I'll walk you through a few questions to check if your project is ready for kickoff. Takes less than 5 minutes.\n\nWhat's the working name for this project?", type: "text", placeholder: "e.g., WooPayments Q2 Launch Video", field: "projectName" },
   { id: 1, msg: "In 2-3 sentences, what is this project and why does it matter right now? Not what the video should look like -- what business problem it solves.", type: "text", placeholder: "e.g., We're launching WooCommerce Payments in three new markets and need a product demo to drive trial signups.", field: "whatAndWhy",
     check: v => v.split(/\s+/).length < 8 ? "That's pretty short. Can you add more about why this matters and what it supports? More context helps VMC nail the creative direction." : null },
   { id: 2, msg: "Who is going to watch this? Be specific: roles, industries, where they are in the buying journey.", type: "text", placeholder: "e.g., Mid-market ecommerce managers evaluating payment solutions. Awareness to consideration stage.", field: "audience",
