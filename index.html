@@ -511,15 +511,12 @@ function App() {
               ))}
 
               <div className="action-section">
-                <div className="action-title">1. Create Linear project</div>
+                <div className="action-title">1. Submit to VMC in Linear</div>
                 <a className="linear-btn" href={buildLinearURL(answers)} target="_blank" rel="noopener noreferrer">
                   <svg viewBox="0 0 100 100" fill="currentColor"><path d="M1.22 61.5a48.95 48.95 0 0 1-1.2-8.25L34.79 88a48.94 48.94 0 0 1-8.25-1.2L1.22 61.5Zm-1-13.21a49.65 49.65 0 0 1 .37-4.04L43.75 87.4c-1.35-.09-2.7-.22-4.04-.37L.23 48.29ZM2.8 39.5a49.52 49.52 0 0 1 1.33-4.2L52.7 93.87a49.7 49.7 0 0 1-4.2 1.33L2.8 39.5Zm4.28-8.83a49.13 49.13 0 0 1 2.17-3.87l61.75 61.75a49.02 49.02 0 0 1-3.87 2.17L7.08 30.67Zm6.34-8.27A49.14 49.14 0 0 1 16.5 19l62.5 62.5a49.06 49.06 0 0 1-3.4 3.08L13.42 22.4ZM22 13.73a49.48 49.48 0 0 1 28.1-12.6 49.65 49.65 0 0 1 48.77 48.77A49.48 49.48 0 0 1 86.27 78L22 13.73Z"/></svg>
-                  Open in Linear (VID2)
+                  Create triage issue in Linear
                 </a>
-                {getTemplateLabel(answers.videoType)
-                  ? <div className="linear-note">This opens a new issue with your intake data pre-filled. After creating it, apply the <strong>{getTemplateLabel(answers.videoType)}</strong> project template.</div>
-                  : <div className="linear-note">This opens a new issue with your intake data pre-filled. Since this is a hybrid project, VMC will set up the project structure at kickoff.</div>
-                }
+                <div className="linear-note">Creates an issue in VID2 triage with your intake data pre-filled. VMC will review, qualify, and set up the project from there.</div>
               </div>
 
               <div className="action-section">
